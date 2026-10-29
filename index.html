@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A practical front-end debugging exercise. Inspect, explain, and improve a fictional learning catalog.">
+<title>Fieldwork — Front-end interview lab</title>
+<style>
+
+:root{--ink:#182e32;
+  --muted:#566b6d;
+  --paper:#f6f5ef;
+  --line:#d7dfd9;
+  --accent:#186c5a;
+  --blue:#205acb;
+  --radius:16px;
+  --space:24px}
+
+*{box-sizing:border-box}
+html{scroll-behavior:auto}
+body{margin:0;
+  color:var(--ink);
+  background:var(--paper);
+  font-family:Georgia,serif;
+  line-height:1.55}
+button,input{font:inherit}
+button,a{touch-action:manipulation}
+a{color:var(--blue)}
+button{cursor:pointer}
+button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #a84a00;
+  outline-offset:4px}
+h1,h2,h3,p{margin-top:0}
+h1{font-size:clamp(2.4rem,5.5vw,4.8rem);
+  line-height:1.06;
+  letter-spacing:-.055em;
+  margin-bottom:22px}
+h2{font-size:1.8rem;
+  line-height:1.2;
+  letter-spacing:-.035em}
+h3{line-height:1.3}
+p{color:var(--muted)}
+.wrap{width:min(1120px,calc(100% - 40px));
+  margin:auto}
+.topbar{border-bottom:1px solid var(--line);
+  background:#fff}
+.nav{display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  min-height:80px}
+.brand{font-size:24px;
+  font-weight:800;
+  letter-spacing:-1px;
+  color:var(--ink);
+  text-decoration:none}
+.brand span{color:var(--accent)}
+.tag{font-size:11px;
+  font-weight:800;
+  letter-spacing:.13em;
+  text-transform:uppercase}
+.pill{border:1px solid var(--line);
+  border-radius:30px;
+  padding:7px 12px;
+  font-size:12px}
+.hero{display:grid;
+  grid-template-columns:1.5fr 1fr;
+  gap:56px;
+  padding:62px 0 48px;
+  align-items:center}
+.eyebrow{color:var(--accent);
+  margin-bottom:18px}
+.intro{font-size:18px;
+  max-width:590px}
+.hero-art{border-radius:24px;
+  background:#dfe9dd;
+  aspect-ratio:1.2;
+  position:relative;
+  overflow:hidden;
+  display:grid;
+  place-items:center}
+.art-grid{display:grid;
+  grid-template-columns:repeat(2,90px);
+  gap:14px;
+  transform:rotate(-12deg)}
+.art-grid span{height:90px;
+  border-radius:18px;
+  background:#186c5a}
+.art-grid span:nth-child(2){border-radius:50%;
+  background:#e8b253}
+.art-grid span:nth-child(3){background:#f9f8ef;
+  border-radius:50% 50% 10px 10px}
+.art-grid span:nth-child(4){background:#385d64;
+  border-radius:10px 45px 10px 10px}
+.hero-art small{position:absolute;
+  bottom:18px;
+  left:22px;
+  font-size:10px;
+  letter-spacing:.2em}
+.brief{background:#fff;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:22px 26px;
+  margin-bottom:32px}
+.brief summary{font-weight:700;
+  cursor:pointer}
+.brief ol{padding-left:22px;
+  color:var(--muted);
+  max-width:850px}
+.brief li{margin:8px 0}
+.toolbar{display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+  border-top:1px solid var(--line);
+  padding-top:18px;
+  margin-top:18px}
+.controls{display:flex;
+  gap:8px;
+  flex-wrap:wrap}
+.control{border:1px solid #b6c5bc;
+  border-radius:8px;
+  background:#fff;
+  padding:9px 13px;
+  font-size:13px;
+  color:var(--ink);
+  font-weight:600}
+.control[aria-pressed="true"]{background:#e3efe8}
+.status{font-size:12px;
+  color:var(--muted);
+  min-height:1.5em;
+  margin:12px 0 0}
+.section-head{display:flex;
+  justify-content:space-between;
+  align-items:end;
+  gap:20px;
+  margin:36px 0 20px}
+.section-head h2{margin-bottom:5px}
+.section-head p{margin-bottom:0}
+.number{font-size:12px;
+  color:var(--accent);
+  font-weight:700}
+.course-grid{display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:20px;
+  min-width:900px}
+.course-card{background:#fff;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  overflow:hidden}
+.course-art{height:155px;
+  background:#dce8f2;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:13px}
+.course-art i{width:52px;
+  height:74px;
+  background:#4d76a7;
+  border-radius:7px;
+  transform:rotate(-12deg)}
+.course-art i:nth-child(2){height:100px;
+  background:#fff;
+  transform:rotate(8deg)}
+.course-art i:nth-child(3){height:56px;
+  background:#e1aa45;
+  transform:rotate(18deg)}
+.course-art.warm{background:#f0e2c9}
+.course-art.green{background:#e0eadb}
+.course-body{padding:22px;
+  position:relative;
+  height:248px}
+.category{font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.13em;
+  color:var(--accent);
+  font-weight:800;
+  margin-bottom:12px}
+.course-title{height:52px;
+  font-size:20px;
+  margin:0 0 12px}
+.course-description{font-size:14px;
+  margin:0}
+.course-body .btn{position:absolute;
+  bottom:20px;
+  left:22px}
+.btn{display:inline-block;
+  padding:10px 17px;
+  border-radius:7px;
+  font-size:13px;
+  font-weight:700}
+.featured{display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+  border:1px solid #bdcfc4;
+  background:#e7eee4;
+  border-radius:var(--radius);
+  padding:26px;
+  margin-top:24px}
+.featured h3{font-size:21px;
+  margin-bottom:6px}
+.featured p{margin-bottom:0}
+.featured a{background:#d4d9d5;
+  color:#3d4a46;
+  border-radius:0;
+  text-decoration:underline}
+.story-shell{display:flow-root;
+  margin:32px 0 0;
+  padding-bottom:18px}
+.story{background:#fff;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:24px}
+.story-visual{float:left;
+  width:240px;
+  height:250px;
+  margin:0 24px 12px 0;
+  border-radius:10px;
+  background:#dfded3;
+  display:grid;
+  place-items:center}
+.story-symbol{width:130px;
+  height:130px;
+  border:22px solid #32705f;
+  border-radius:50%;
+  position:relative}
+.story-symbol:after{content:"";
+  position:absolute;
+  width:54px;
+  height:54px;
+  background:#deb35c;
+  right:-30px;
+  bottom:-20px;
+  border-radius:8px}
+.story h3{font-size:25px;
+  margin-bottom:10px}
+.story p{font-size:15px}
+.footer{margin-top:30px;
+  border-top:1px solid var(--line);
+  padding:24px 0 36px;
+  font-size:12px;
+  color:var(--muted);
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  flex-wrap:wrap}
+dialog{border:1px solid var(--line);
+  border-radius:18px;
+  padding:30px;
+  max-width:min(480px,calc(100% - 40px));
+  color:var(--ink)}
+dialog::backdrop{background:#132c3299}
+dialog h2{font-size:24px}
+dialog p{font-size:15px}
+.dialog-close{margin-top:15px}
+
+@media(max-width:700px){.wrap{width:calc(100% - 32px)}
+.hero{grid-template-columns:1fr;
+  padding:36px 0 28px;
+  gap:20px}
+.hero-art{display:none}
+.intro{font-size:16px}
+.nav{min-height:68px}
+.pill{font-size:10px}
+.brief{padding:18px}
+.section-head{align-items:start}
+.section-head p{font-size:14px}
+.featured{align-items:start;
+  flex-direction:column}
+.story-visual{width:58%;
+  height:225px;
+  margin-right:16px}
+.footer{margin-top:16px}
+}
+
+
+</style>
+</head>
+<body>
+<header class="topbar"><div class="wrap nav"><a class="brand" href="#">fieldwork<span>↗</span></a><span class="pill">FRONT-END INTERVIEW LAB</span></div></header>
+<main class="wrap">
+<section class="hero" aria-labelledby="hero-title"><div><p class="tag eyebrow">Learn something. Build something.</p><h1 id="hero-title">Small skills.<br>Lasting impact.</h1><p class="intro">Practical learning for people who make digital experiences better. Explore our latest courses and hands-on workshops.</p><span class="tag">Independent learning · Fictional catalog</span></div><div class="hero-art" aria-hidden="true"><div class="art-grid"><span></span><span></span><span></span><span></span></div><small>MAKE ROOM FOR WHAT’S NEXT</small></div></section>
+<details class="brief" open><summary>Your task · Inspect, explain, improve</summary><p style="margin-top:12px">This page has several reported display problems. Use browser DevTools to investigate. Explain your reasoning and demonstrate fixes where possible.</p><ol><li>At phone widths, the page should fit without horizontal scrolling.</li><li>All “View course” actions should use the same blue fill, white text, and rounded corners—including the featured course.</li><li>Course titles and descriptions must stay readable with longer content. Actions must not overlap text.</li><li>The workshop image should sit beside text on desktop, then above full-width text on mobile. Its white panel should contain the whole image.</li><li>The page should display its final typography and button styling immediately on first load.</li></ol><div class="toolbar"><span class="tag">20-minute exercise</span><div class="controls"><button class="control" id="content-toggle" aria-pressed="false">Use long sample content</button><button class="control" id="media-toggle" aria-pressed="false">Remove first image</button><button class="control" id="replay">Replay first load</button><button class="control" id="reset">Reset page</button></div></div><p class="status" id="status" role="status">Default content. Changes in DevTools are temporary; reset reloads the page.</p></details>
+<section aria-labelledby="courses-title"><div class="section-head"><div><p class="number">01 / THE CATALOG</p><h2 id="courses-title">Build your next skill.</h2><p>Thoughtful lessons. Useful outcomes.</p></div><span class="pill">3 courses</span></div><div class="course-grid">
+<article class="course-card"><div class="course-art" id="first-image" aria-hidden="true"><i></i><i></i><i></i></div><div class="course-body"><p class="category">Design foundations · 2 hours</p><h3 class="course-title" id="first-title">Introduction to UX</h3><p class="course-description" id="first-description">Turn user needs into clear, purposeful digital experiences.</p><a class="btn" href="#course-dialog" data-course="Introduction to UX">View course <span aria-hidden="true">↗</span></a></div></article>
+<article class="course-card"><div class="course-art warm" aria-hidden="true"><i></i><i></i><i></i></div><div class="course-body"><p class="category">Front-end craft · 3 hours</p><h3 class="course-title">CSS that scales</h3><p class="course-description">Build a shared visual language that works across components.</p><a class="btn" href="#course-dialog" data-course="CSS that scales">View course <span aria-hidden="true">↗</span></a></div></article>
+<article class="course-card"><div class="course-art green" aria-hidden="true"><i></i><i></i><i></i></div><div class="course-body"><p class="category">Inclusive design · 2 hours</p><h3 class="course-title">Accessible by design</h3><p class="course-description">Make everyday interactions work for more people.</p><a class="btn" href="#course-dialog" data-course="Accessible by design">View course <span aria-hidden="true">↗</span></a></div></article>
+</div><aside class="featured"><div><p class="category">Featured course</p><h3>Design systems in practice</h3><p>Connect your design decisions to reusable front-end code.</p></div><a class="btn" href="#course-dialog" data-course="Design systems in practice">View course <span aria-hidden="true">↗</span></a></aside></section>
+<section class="story-shell" aria-labelledby="workshop-title"><div class="section-head"><div><p class="number">02 / LEARN TOGETHER</p><h2 id="workshop-title">A little guidance goes a long way.</h2></div></div><div class="story"><div class="story-visual" aria-hidden="true"><div class="story-symbol"></div></div><p class="category">Live workshop</p><h3>Better interfaces, together.</h3><p>Bring a real design challenge. Leave with a clearer approach and a practical next step.</p><p>Small groups. Shared ideas. Room to experiment.</p></div></section>
+<footer class="footer"><span class="brand">fieldwork<span>↗</span></span><span>Interview exercise only · No purchases or personal data collected</span></footer>
+</main>
+<dialog id="course-dialog" aria-labelledby="dialog-title"><h2 id="dialog-title">Course details</h2><p>This is a fictional course for the debugging exercise. No enrollment is required.</p><form method="dialog"><button class="control dialog-close">Close details</button></form></dialog>
+<script>
+const visualStyles = `body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.btn{background:#205acb;color:white;text-decoration:none}.btn:hover{background:#1648a9}`;
+let visualTimer;
+function loadVisualStyles(){
+  clearTimeout(visualTimer);
+  document.getElementById('visual-theme')?.remove();
+  visualTimer=setTimeout(()=>{
+    const style=document.createElement('style');
+    style.id='visual-theme';
+    style.textContent=visualStyles;
+    document.head.append(style);
+  },1500);
+}
+loadVisualStyles();
+const status=document.getElementById('status');
+document.getElementById('content-toggle').addEventListener('click',function(){
+  const long=this.getAttribute('aria-pressed')!=='true';
+  this.setAttribute('aria-pressed',String(long));
+  this.textContent=long?'Restore short content':'Use long sample content';
+  document.getElementById('first-title').textContent=long?'Designing Accessible Digital Experiences for Educators and School Administrators':'Introduction to UX';
+  document.getElementById('first-description').textContent=long?'Explore practical research methods, inclusive interaction patterns, content strategy, and accessible interface design. This course includes guided activities for educators, school administrators, and digital teams with different levels of technical experience.':'Turn user needs into clear, purposeful digital experiences.';
+  status.textContent=long?'Long sample content applied to the first card.':'Short sample content restored.';
+});
+document.getElementById('media-toggle').addEventListener('click',function(){
+  const removed=this.getAttribute('aria-pressed')!=='true';
+  this.setAttribute('aria-pressed',String(removed));
+  this.textContent=removed?'Restore first image':'Remove first image';
+  document.getElementById('first-image').style.display=removed?'none':'';
+  status.textContent=removed?'First card image removed.':'First card image restored.';
+});
+document.getElementById('replay').addEventListener('click',()=>{loadVisualStyles();status.textContent='First-load sequence replayed.';window.scrollTo(0,0)});
+document.getElementById('reset').addEventListener('click',()=>location.reload());
+const dialog=document.getElementById('course-dialog');
+document.querySelectorAll('[data-course]').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();document.getElementById('dialog-title').textContent=link.dataset.course;dialog.showModal()}));
+dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close()}});
+</script>
+</body>
+</html>
